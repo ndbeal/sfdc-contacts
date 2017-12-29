@@ -9,3 +9,11 @@ sfdc-contacts-nbeal/\.DS_Store/
 sfdc-contacts-nbeal/catalog/
 
 sfdc-contacts-nbeal/target/
+
+\.mule/
+
+src/main/resources/\.DS_Store
+
+target/
+
+\.DS_Store
