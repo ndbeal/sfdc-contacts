@@ -4,6 +4,8 @@ sfdc-contacts-nbeal/\.mule/
 
 sfdc-contacts-nbeal/\.settings/
 
+sfdc-contacts-nbeal/\.DS_Store/
+
 sfdc-contacts-nbeal/catalog/
 
 sfdc-contacts-nbeal/target/

@@ -15,7 +15,7 @@ http://www.mulesoft.org/schema/mule/oauth2-provider http://www.mulesoft.org/sche
 
     <flow name="aliveFlow">
         <http:listener config-ref="api-httpListenerConfig" path="/alive" doc:name="HTTP"/>
-        <set-payload value="and kicking (like a mule). ${email.user} ${sfdc.user}" doc:name="Set Payload"/>
+        <set-payload value="and kicking (like a mule)." doc:name="Set Payload"/>
     </flow>
 
     <flow name="notifyFlow">
