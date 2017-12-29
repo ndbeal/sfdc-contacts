@@ -1,0 +1,89 @@
+<testsuite name="testcase" time="16.543" failures="0" errors="0" skipped="0" tests="22">
+  <properties>
+    <property key="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property key="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib"/>
+    <property key="java.vm.version" value="25.151-b12"/>
+    <property key="gopherProxySet" value="false"/>
+    <property key="maven.multiModuleProjectDirectory" value="/Users/nathan/AnypointStudio/mulework/sfdc-contacts-nbeal"/>
+    <property key="java.vm.vendor" value="Oracle Corporation"/>
+    <property key="java.vendor.url" value="http://java.oracle.com/"/>
+    <property key="guice.disable.misplaced.annotation.check" value="true"/>
+    <property key="path.separator" value=":"/>
+    <property key="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property key="file.encoding.pkg" value="sun.io"/>
+    <property key="user.country" value="CA"/>
+    <property key="sun.java.launcher" value="SUN_STANDARD"/>
+    <property key="sun.os.patch.level" value="unknown"/>
+    <property key="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property key="user.dir" value="/Users/nathan/AnypointStudio/mulework/sfdc-contacts-nbeal"/>
+    <property key="java.runtime.version" value="1.8.0_151-b12"/>
+    <property key="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
+    <property key="java.endorsed.dirs" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/endorsed"/>
+    <property key="os.arch" value="x86_64"/>
+    <property key="java.io.tmpdir" value="/var/folders/16/t7hqc5g119v8ffpj88rtgvy80000gn/T/"/>
+    <property key="line.separator" value="&#xa;"/>
+    <property key="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property key="os.name" value="Mac OS X"/>
+    <property key="classworlds.conf" value="/Users/nathan/tools/apache-maven-3.5.2/bin/m2.conf"/>
+    <property key="sun.jnu.encoding" value="UTF-8"/>
+    <property key="java.library.path" value="/Users/nathan/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property key="maven.conf" value="/Users/nathan/tools/apache-maven-3.5.2/conf"/>
+    <property key="java.specification.name" value="Java Platform API Specification"/>
+    <property key="java.class.version" value="52.0"/>
+    <property key="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property key="os.version" value="10.13.2"/>
+    <property key="library.jansi.path" value="/Users/nathan/tools/apache-maven-3.5.2/lib/jansi-native"/>
+    <property key="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property key="user.home" value="/Users/nathan"/>
+    <property key="user.timezone" value="America/Toronto"/>
+    <property key="java.awt.printerjob" value="sun.lwawt.macosx.CPrinterJob"/>
+    <property key="file.encoding" value="UTF-8"/>
+    <property key="java.specification.version" value="1.8"/>
+    <property key="java.class.path" value="/Users/nathan/tools/apache-maven-3.5.2/boot/plexus-classworlds-2.5.2.jar"/>
+    <property key="user.name" value="nathan"/>
+    <property key="java.vm.specification.version" value="1.8"/>
+    <property key="sun.java.command" value="org.codehaus.plexus.classworlds.launcher.Launcher -B clean package"/>
+    <property key="java.home" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre"/>
+    <property key="sun.arch.data.model" value="64"/>
+    <property key="user.language" value="en"/>
+    <property key="java.specification.vendor" value="Oracle Corporation"/>
+    <property key="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit"/>
+    <property key="java.vm.info" value="mixed mode"/>
+    <property key="java.version" value="1.8.0_151"/>
+    <property key="java.ext.dirs" value="/Users/nathan/Library/Java/Extensions:/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/ext:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java"/>
+    <property key="sun.boot.class.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/classes"/>
+    <property key="java.vendor" value="Oracle Corporation"/>
+    <property key="maven.home" value="/Users/nathan/tools/apache-maven-3.5.2"/>
+    <property key="file.separator" value="/"/>
+    <property key="java.vendor.url.bug" value="http://bugreport.sun.com/bugreport/"/>
+    <property key="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property key="sun.cpu.endian" value="little"/>
+    <property key="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property key="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property key="sun.cpu.isalist" value=""/>
+    <property key="mule.testingMode" value="true"/>
+    <property key="mule.working.dir" value="/Users/nathan/AnypointStudio/mulework/sfdc-contacts-nbeal/target/.mule"/>
+  </properties>
+  <testcase time="1.138" name="basicAddUpdateDeleteByIdFlow" classname="testcase"/>
+  <testcase time="1.284" name="restyAddUpdateDeleteByIdFlow" classname="testcase"/>
+  <testcase time="0.791" name="addSameTwiceGetErrorAndDelete" classname="testcase"/>
+  <testcase time="0.343" name="getContactById" classname="testcase"/>
+  <testcase time="0.14" name="getContactByBadEmail" classname="testcase"/>
+  <testcase time="0.14" name="getContactByBadId" classname="testcase"/>
+  <testcase time="0.154" name="deleteContactBadQuery" classname="testcase"/>
+  <testcase time="0.178" name="getContactBadNoQueryParams" classname="testcase"/>
+  <testcase time="0.166" name="updateMissingId" classname="testcase"/>
+  <testcase time="0.129" name="deleteContactByBadId" classname="testcase"/>
+  <testcase time="0.811" name="addDeleteByName" classname="testcase"/>
+  <testcase time="0.211" name="getContactByName" classname="testcase"/>
+  <testcase time="0.125" name="deleteContactByGoodNameAndBadEmail" classname="testcase"/>
+  <testcase time="0.227" name="getContactByEmail" classname="testcase"/>
+  <testcase time="0.143" name="deleteContactByBadEmail" classname="testcase"/>
+  <testcase time="0.138" name="deleteContactByBadName" classname="testcase"/>
+  <testcase time="2.433" name="addSimilarTwiceGetDuplicateErrorsOnSearchsThenDelete" classname="testcase"/>
+  <testcase time="0.197" name="getContactByNameAndEmail" classname="testcase"/>
+  <testcase time="0.053" name="getContactBadQueryParams" classname="testcase"/>
+  <testcase time="0.14" name="getContactByBadName" classname="testcase"/>
+  <testcase time="0.143" name="getContactByGoodNameAndBadEmail" classname="testcase"/>
+  <testcase time="0.956" name="addDeleteByEmail" classname="testcase"/>
+</testsuite>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <flow name="contactDELETEFlow">
+        <logger message="Enter DELETE flow" level="DEBUG" category="deleteContactLogger" doc:name="Logger"/>
+        <set-variable variableName="id" value="#[ ( message.inboundProperties.'http.uri.params' != null &amp;&amp; message.inboundProperties.'http.uri.params'.SFDC_Id != null ) ? message.inboundProperties.'http.uri.params'.SFDC_Id : ( message.inboundProperties.'http.query.params' != null ? message.inboundProperties.'http.query.params'.id : &quot;&quot; ) ]" doc:name="Set Id"/>
+        <choice doc:name="get id from get if not supplied">
+            <when expression="#[flowVars.id == null]">
+                <logger message="Calling GET to retrieve Id" level="DEBUG" category="deleteContactLogger" doc:name="Logger"/>
+                <flow-ref name="contactGETFlow" doc:name="contactGETFlow"/>
+            </when>
+            <otherwise>
+                <logger message="Using supplied Id" level="DEBUG" category="deleteContactLogger" doc:name="Logger"/>
+                <set-payload value="{   &quot;message&quot;: {     &quot;Id&quot;: &quot;#[flowVars.id]&quot;  } }" doc:name="Format Id as supplied"/>
+            </otherwise>
+        </choice>
+        <logger message="Id entering deletion is #[payload.message.id]" level="DEBUG" category="deleteContactLogger" doc:name="Logger"/>
+        <choice doc:name="Choice">
+            <when expression="#[message.outboundProperties.'http.status' == null || message.outboundProperties.'http.status' == &quot;200&quot;]">
+                <dw:transform-message doc:name="Transform Message" metadata:id="ff5ad3e6-2202-451e-9693-2675713a57fa">
+                    <dw:input-payload mimeType="application/json"/>
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+[payload.message.Id]]]></dw:set-payload>
+                </dw:transform-message>
+                <logger message="Id prepared to send to SFDC" level="DEBUG" category="deleteContactLogger" doc:name="Logger"/>
+                <sfdc:delete config-ref="ndbeal_SF_Authentication" doc:name="Salesforce">
+                    <sfdc:ids ref="#[payload]"/>
+                </sfdc:delete>
+                <logger message="Response recieved from SFDC" level="DEBUG" category="deleteContactLogger" doc:name="Logger"/>
+                <dw:transform-message doc:name="Transform Message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	success: payload[0].success,
+	status: 200 when payload[0].success otherwise 400
+}]]></dw:set-payload>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+200 when payload[0].success otherwise 400]]></dw:set-property>
+                </dw:transform-message>
+
+            </when>
+            <otherwise>
+                <logger message="Not found, no deletion" level="DEBUG" category="deleteContactLogger" doc:name="Logger"/>
+                <dw:transform-message doc:name="Fail case, use contactGetFlow response">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+payload]]></dw:set-payload>
+                </dw:transform-message>
+            </otherwise>
+        </choice>
+        <logger message="Exiting DELETE flow, status #[payload.status]" level="DEBUG" category="deleteContactLogger" doc:name="Logger"/>
+    </flow>
+</mule>

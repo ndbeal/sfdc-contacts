@@ -1,0 +1,26 @@
+SUCCESS - Test basicAddUpdateDeleteByIdFlow finished Successfully.
+SUCCESS - Test restyAddUpdateDeleteByIdFlow finished Successfully.
+SUCCESS - Test addSameTwiceGetErrorAndDelete finished Successfully.
+SUCCESS - Test getContactById finished Successfully.
+SUCCESS - Test getContactByBadEmail finished Successfully.
+SUCCESS - Test getContactByBadId finished Successfully.
+SUCCESS - Test deleteContactBadQuery finished Successfully.
+SUCCESS - Test getContactBadNoQueryParams finished Successfully.
+SUCCESS - Test updateMissingId finished Successfully.
+SUCCESS - Test deleteContactByBadId finished Successfully.
+SUCCESS - Test addDeleteByName finished Successfully.
+SUCCESS - Test getContactByName finished Successfully.
+SUCCESS - Test deleteContactByGoodNameAndBadEmail finished Successfully.
+SUCCESS - Test getContactByEmail finished Successfully.
+SUCCESS - Test deleteContactByBadEmail finished Successfully.
+SUCCESS - Test deleteContactByBadName finished Successfully.
+SUCCESS - Test addSimilarTwiceGetDuplicateErrorsOnSearchsThenDelete finished Successfully.
+SUCCESS - Test getContactByNameAndEmail finished Successfully.
+SUCCESS - Test getContactBadQueryParams finished Successfully.
+SUCCESS - Test getContactByBadName finished Successfully.
+SUCCESS - Test getContactByGoodNameAndBadEmail finished Successfully.
+SUCCESS - Test addDeleteByEmail finished Successfully.
+
+===============================================================================
+Tests run: 22 - Failures: 0 - Errors: 0 - Skipped: 0 - Time elapsed: 16.543 sec
+===============================================================================

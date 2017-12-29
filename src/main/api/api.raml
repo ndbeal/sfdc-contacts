@@ -1,0 +1,167 @@
+#%RAML 0.8
+title: sfdc contacts nbeal
+version: 1.1
+
+/allcontacts:
+ get:
+  responses:
+    200:
+      body:
+        application/json:
+          example: !include getAllcontacts200Response.json
+
+/contact:
+  get:
+    queryParameters: 
+      id:
+        displayName: Id
+        type: string
+        description: SFDC internal id
+        example: 0031I000007CrRIQA0
+        required: false
+      name:
+        displayName: full name
+        type: string
+        description: Full name of contact
+        example: Joan Smith
+        required: false
+      email:
+        displayName: associated email
+        type: string
+        description: an email adress associated with the contact
+        example: joan.smith@example.com
+        required: false
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: !include getContact200Response.json
+              
+      400:
+        body:
+          application/json:
+            example: |
+              {
+                "success": false,
+                "status": 400,
+                "message": []
+              }
+
+      404:
+        body:
+          application/json:
+            example: |
+              {
+                "success": false,
+                "status": 404,
+                "message": []
+              }
+
+  post:
+    body:
+      application/json:
+        example: !include newContactRequest.json
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: |
+              {
+                "success": true,
+                "status": 200,
+                "message": "0031I000006TCBJQA4"
+              }
+          
+  put:
+    body:
+      application/json:
+        example: !include updateContactRequest.json
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: |
+              {
+                "success": true,
+                "status": 200,
+                "message": ""
+              }
+          
+  delete:
+    queryParameters: 
+      id:
+        displayName: Id
+        type: string
+        description: SFDC internal id
+        example: 0031I000007CrRIQA0
+        required: false
+      name:
+        displayName: full name
+        type: string
+        description: Full name of contact
+        example: Joan Smith
+        required: false
+      email:
+        displayName: associated email
+        type: string
+        description: an email adress associated with the contact
+        example: joan.smith@example.com
+        required: false
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: |
+              {
+                "success": true,
+                "status": 200
+              }
+      400:
+        body:
+          application/json:
+            example: |
+              {
+                "success": false,
+                "status": 400,
+                "message": []
+              }
+      404:
+        body:
+          application/json:
+            example: |
+              {
+                "success": false,
+                "status": 404,
+                "message": []
+              }
+  /{SFDC_Id}:
+    get:
+      responses: 
+        200:
+          body: 
+            application/json:
+              example: !include getContact200Response.json
+    put:
+      body:
+        application/json:
+          example: !include newContactRequest.json
+      responses: 
+        200:
+          body: 
+            application/json:
+              example: |
+                {
+                  "success": true,
+                  "status": 200,
+                  "message": ""
+                }
+    delete:
+        responses: 
+          200:
+            body: 
+              application/json:
+                example: |
+                  {
+                    "success": true,
+                    "status": 200
+                  }

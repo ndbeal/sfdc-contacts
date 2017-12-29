@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:context="http://www.springframework.org/schema/context" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <spring:beans>
+        <spring:import resource="classpath:allcontacts.xml"/>
+        <spring:import resource="classpath:getcontact.xml"/>
+        <spring:import resource="classpath:addcontact.xml"/>
+        <spring:import resource="classpath:updatecontact.xml"/>
+        <spring:import resource="classpath:deletecontact.xml"/>
+        <spring:import resource="classpath:global.xml"/>
+    </spring:beans>
+    <munit:config name="munit" doc:name="MUnit configuration"/>
+    <sub-flow name="addContact">
+        <flow-ref name="contactPOSTFlow" doc:name="post"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <munit:assert-not-null doc:name="Assert Not Null Payload" message="add contact supplied empty payload"/>
+    </sub-flow>
+    <sub-flow name="getContact">
+        <flow-ref name="contactGETFlow" doc:name="get"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <munit:assert-not-null doc:name="Assert Not Null Payload" message="get contact supplied empty payload"/>
+    </sub-flow>
+    <sub-flow name="deleteContact">
+        <flow-ref name="contactDELETEFlow" doc:name="delete"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <munit:assert-not-null message="delete contact supplied empty payload" doc:name="Assert Not Null Payload"/>
+    </sub-flow>
+    <sub-flow name="updateContact">
+        <flow-ref name="contactPUTFlow" doc:name="put"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <munit:assert-not-null message="update contact supplied empty payload" doc:name="Assert Not Null Payload"/>
+    </sub-flow>
+    <sub-flow name="getall">
+        <munit:set payload="#[]" doc:name="Set Message"/>
+        <flow-ref name="allcontactsGETFlow" doc:name="allcontactsGETFlow"/>
+        <dw:transform-message doc:name="get /all">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <munit:assert-not-null doc:name="Assert Not Null Payload"/>
+    </sub-flow>
+    <munit:before-suite name="testcaseBefore_Suite" description="MUnit Test">
+        <flow-ref name="getall" doc:name="get /all"/>
+        <munit:assert-true message="Expecting 17 contacts before we start, check for leftover test data from previous runs!" condition="#[payload.message.size() == 17]" doc:name="expect 17 items prior to start"/>
+    </munit:before-suite>
+    <munit:after-suite name="testcaseAfter_Suite" description="Ater suite actions">
+        <flow-ref name="getall" doc:name="get /all"/>
+        <munit:assert-true message="Expecting 17 contacts after we complete, check for leftover test data from this run and debug issue!" condition="#[payload.message.size() == 17]" doc:name="expect 17 contacts on completion"/>
+    </munit:after-suite>
+    <munit:test name="getContactById" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['id':'0031I000006TCBMQA4']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-true message="Get didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+    </munit:test>
+    <munit:test name="getContactByName" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['name':'Tim Barr']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-true message="Get didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+    </munit:test>
+    <munit:test name="getContactByEmail" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'barr_tim@grandhotels.com']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-true message="Get didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+    </munit:test>
+    <munit:test name="getContactByNameAndEmail" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'barr_tim@grandhotels.com'],['name':'Tim Barr']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-true message="Get didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+    </munit:test>
+    <munit:test name="getContactBadQueryParams" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['bad':'0031I000006ZZZZZZ4']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-false message="Bad get didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="getContactBadNoQueryParams" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-false message="Bad get didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="getContactByBadId" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['id':'0031I000006ZZZZZZ4']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-false message="Bad get didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="getContactByBadName" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['name':'I do not exist']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-false message="Bad get didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="getContactByBadEmail" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'bad@email.tld']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-false message="Bad get didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="getContactByGoodNameAndBadEmail" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'bad@email.tld'],['name':'Tim Barr']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get contact"/>
+        <munit:assert-false message="Bad get didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="addDeleteByName" description="MUnit Test">
+        <munit:set payload="{&quot;Email&quot;: &quot;delete@mefive.ca&quot;,&quot;FirstName&quot;: &quot;test&quot;,&quot;Department&quot;: &quot;Of fun&quot;,&quot;LastName&quot;: &quot;testsen&quot;,&quot;Salutation&quot;: &quot;mr&quot;,&quot;OtherStreet&quot;: &quot;another street&quot;,&quot;OtherCity&quot;: &quot;another city&quot;,&quot;OtherState&quot;: &quot;another state&quot;,&quot;OtherPostalCode&quot;: &quot;another&quot;,&quot;OtherCountry&quot;: &quot;anotheronia&quot;,&quot;MailingStreet&quot;: &quot;mailing street&quot;,&quot;MailingCity&quot;: &quot;mailing city&quot;,&quot;MailingState&quot;: &quot;mailing state&quot;,&quot;MailingPostalCode&quot;: &quot;mailing&quot;,&quot;MailingCountry&quot;: &quot;maiistan&quot;,&quot;Phone&quot;: &quot;1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;1 234 567 8910&quot;,&quot;Fax&quot;: &quot;1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;delete title&quot;,&quot;AssistantName&quot;: &quot;johnathan rivers&quot;,&quot;Birthdate&quot;: &quot;1970-01-30&quot;, &quot;Description&quot;: &quot;Tall dark and so-so&quot;}" encoding="UTF-8" mimeType="application/json" doc:name="Set Message"/>
+        <flow-ref name="addContact" doc:name="put"/>
+        <munit:assert-true message="Add didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['name':'test testsen']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-true message="Delete didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+    </munit:test>
+   
+    <munit:test name="basicAddUpdateDeleteByIdFlow" description="MUnit Test">
+        <flow-ref name="getall" doc:name="get /all"/>
+        <set-session-variable variableName="beforeCount" value="#[payload.message.size()]" doc:name="Session Variable"/>
+        <munit:set payload="{&quot;Email&quot;: &quot;delete@mefive.ca&quot;,&quot;FirstName&quot;: &quot;test&quot;,&quot;Department&quot;: &quot;Of fun&quot;,&quot;LastName&quot;: &quot;testsen&quot;,&quot;Salutation&quot;: &quot;mr&quot;,&quot;OtherStreet&quot;: &quot;another street&quot;,&quot;OtherCity&quot;: &quot;another city&quot;,&quot;OtherState&quot;: &quot;another state&quot;,&quot;OtherPostalCode&quot;: &quot;another&quot;,&quot;OtherCountry&quot;: &quot;anotheronia&quot;,&quot;MailingStreet&quot;: &quot;mailing street&quot;,&quot;MailingCity&quot;: &quot;mailing city&quot;,&quot;MailingState&quot;: &quot;mailing state&quot;,&quot;MailingPostalCode&quot;: &quot;mailing&quot;,&quot;MailingCountry&quot;: &quot;maiistan&quot;,&quot;Phone&quot;: &quot;1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;1 234 567 8910&quot;,&quot;Fax&quot;: &quot;1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;delete title&quot;,&quot;AssistantName&quot;: &quot;johnathan rivers&quot;,&quot;Birthdate&quot;: &quot;1970-01-30&quot;,	&quot;Description&quot;: &quot;Tall dark and so-so&quot;}" doc:name="Set Message" encoding="UTF-8" mimeType="application/json"/>
+        <flow-ref name="addContact" doc:name="put"/>
+        <munit:assert-true message="Add didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+        <set-session-variable variableName="id" value="#[payload.message]" doc:name="id"/>
+        <flow-ref name="getall" doc:name="get /all"/>
+        <munit:assert-true condition="#[payload.message.size() == (1+sessionVars.beforeCount)]" doc:name="check all has extra"/>
+        <munit:set payload="{&quot;Id&quot;: &quot;#[sessionVars.id]&quot;, &quot;Email&quot;: &quot;changedelete@mefive.ca&quot;,&quot;FirstName&quot;: &quot;change&quot;,&quot;Department&quot;: &quot;change&quot;,&quot;LastName&quot;: &quot;changesen&quot;,&quot;Salutation&quot;: &quot;changemr&quot;,&quot;OtherStreet&quot;: &quot;changeanother street&quot;,&quot;OtherCity&quot;: &quot;changeanother city&quot;,&quot;OtherState&quot;: &quot;changeanother state&quot;,&quot;OtherPostalCode&quot;: &quot;changeanother&quot;,&quot;OtherCountry&quot;: &quot;changeanotheronia&quot;,&quot;MailingStreet&quot;: &quot;changemailing street&quot;,&quot;MailingCity&quot;: &quot;changemailing city&quot;,&quot;MailingState&quot;: &quot;changemailing state&quot;,&quot;MailingPostalCode&quot;: &quot;changemailing&quot;,&quot;MailingCountry&quot;: &quot;changemaiistan&quot;,&quot;Phone&quot;: &quot;change1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;change1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;change1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;change1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;change1 234 567 8910&quot;,&quot;Fax&quot;: &quot;change1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;change delete title&quot;,&quot;AssistantName&quot;: &quot;joan lakes&quot;,&quot;Birthdate&quot;: &quot;1980-01-30&quot;, &quot;Description&quot;: &quot;change Tall dark and so-so&quot;}" encoding="UTF-8" mimeType="application/json" doc:name="Set Message"/>
+        <flow-ref name="updateContact" doc:name="post"/>
+        <munit:assert-true message="Update didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['id':sessionVars.id]]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-true message="Delete didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+    </munit:test>
+    
+    <munit:test name="restyAddUpdateDeleteByIdFlow" description="MUnit Test">
+        <flow-ref name="getall" doc:name="get /all"/>
+        <set-session-variable variableName="beforeCount" value="#[payload.message.size()]" doc:name="Session Variable"/>
+        <munit:set payload="{&quot;Email&quot;: &quot;delete@mefive.ca&quot;,&quot;FirstName&quot;: &quot;test&quot;,&quot;Department&quot;: &quot;Of fun&quot;,&quot;LastName&quot;: &quot;testsen&quot;,&quot;Salutation&quot;: &quot;mr&quot;,&quot;OtherStreet&quot;: &quot;another street&quot;,&quot;OtherCity&quot;: &quot;another city&quot;,&quot;OtherState&quot;: &quot;another state&quot;,&quot;OtherPostalCode&quot;: &quot;another&quot;,&quot;OtherCountry&quot;: &quot;anotheronia&quot;,&quot;MailingStreet&quot;: &quot;mailing street&quot;,&quot;MailingCity&quot;: &quot;mailing city&quot;,&quot;MailingState&quot;: &quot;mailing state&quot;,&quot;MailingPostalCode&quot;: &quot;mailing&quot;,&quot;MailingCountry&quot;: &quot;maiistan&quot;,&quot;Phone&quot;: &quot;1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;1 234 567 8910&quot;,&quot;Fax&quot;: &quot;1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;delete title&quot;,&quot;AssistantName&quot;: &quot;johnathan rivers&quot;,&quot;Birthdate&quot;: &quot;1970-01-30&quot;,	&quot;Description&quot;: &quot;Tall dark and so-so&quot;}" doc:name="Set Message" encoding="UTF-8" mimeType="application/json"/>
+        <flow-ref name="addContact" doc:name="put"/>
+        <munit:assert-true message="Add didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+        <set-session-variable variableName="id" value="#[payload.message]" doc:name="id"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.uri.params" value="#[['SFDC_Id':sessionVars.id]]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-true message="Can't find item just added" condition="#[payload.success]" doc:name="Assert True"/>
+        <flow-ref name="getall" doc:name="get /all"/>
+        <munit:assert-true condition="#[payload.message.size() == (1+sessionVars.beforeCount)]" doc:name="check all has extra"/>
+        <munit:set payload="{&quot;Email&quot;: &quot;changedelete@mefive.ca&quot;,&quot;FirstName&quot;: &quot;change&quot;,&quot;Department&quot;: &quot;change&quot;,&quot;LastName&quot;: &quot;changesen&quot;,&quot;Salutation&quot;: &quot;changemr&quot;,&quot;OtherStreet&quot;: &quot;changeanother street&quot;,&quot;OtherCity&quot;: &quot;changeanother city&quot;,&quot;OtherState&quot;: &quot;changeanother state&quot;,&quot;OtherPostalCode&quot;: &quot;changeanother&quot;,&quot;OtherCountry&quot;: &quot;changeanotheronia&quot;,&quot;MailingStreet&quot;: &quot;changemailing street&quot;,&quot;MailingCity&quot;: &quot;changemailing city&quot;,&quot;MailingState&quot;: &quot;changemailing state&quot;,&quot;MailingPostalCode&quot;: &quot;changemailing&quot;,&quot;MailingCountry&quot;: &quot;changemaiistan&quot;,&quot;Phone&quot;: &quot;change1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;change1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;change1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;change1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;change1 234 567 8910&quot;,&quot;Fax&quot;: &quot;change1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;change delete title&quot;,&quot;AssistantName&quot;: &quot;joan lakes&quot;,&quot;Birthdate&quot;: &quot;1980-01-30&quot;, &quot;Description&quot;: &quot;change Tall dark and so-so&quot;}" encoding="UTF-8" mimeType="application/json" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.uri.params" value="#[['SFDC_Id':sessionVars.id]]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="updateContact" doc:name="post"/>
+        <munit:assert-true message="Update didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.uri.params" value="#[['SFDC_Id':sessionVars.id]]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-true message="Delete didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+    </munit:test>    
+    
+    
+    <munit:test name="addDeleteByEmail" description="MUnit Test">
+        <munit:set payload="{&quot;Email&quot;: &quot;delete@mefive.ca&quot;,&quot;FirstName&quot;: &quot;test&quot;,&quot;Department&quot;: &quot;Of fun&quot;,&quot;LastName&quot;: &quot;testsen&quot;,&quot;Salutation&quot;: &quot;mr&quot;,&quot;OtherStreet&quot;: &quot;another street&quot;,&quot;OtherCity&quot;: &quot;another city&quot;,&quot;OtherState&quot;: &quot;another state&quot;,&quot;OtherPostalCode&quot;: &quot;another&quot;,&quot;OtherCountry&quot;: &quot;anotheronia&quot;,&quot;MailingStreet&quot;: &quot;mailing street&quot;,&quot;MailingCity&quot;: &quot;mailing city&quot;,&quot;MailingState&quot;: &quot;mailing state&quot;,&quot;MailingPostalCode&quot;: &quot;mailing&quot;,&quot;MailingCountry&quot;: &quot;maiistan&quot;,&quot;Phone&quot;: &quot;1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;1 234 567 8910&quot;,&quot;Fax&quot;: &quot;1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;delete title&quot;,&quot;AssistantName&quot;: &quot;johnathan rivers&quot;,&quot;Birthdate&quot;: &quot;1970-01-30&quot;, &quot;Description&quot;: &quot;Tall dark and so-so&quot;}" encoding="UTF-8" mimeType="application/json" doc:name="Set Message"/>
+        <flow-ref name="addContact" doc:name="put"/>
+        <munit:assert-true message="Add didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'delete@mefive.ca']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-true message="Delete didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+    </munit:test>
+    
+    <munit:test name="deleteContactByBadId" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['id':'0031I000006ZZZZZZ4']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-false message="Bad delete didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="deleteContactByBadName" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['name':'I do not exist']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-false message="Bad delete didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="deleteContactByBadEmail" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'bad@email.tld']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-false message="Bad delete didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="deleteContactByGoodNameAndBadEmail" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'bad@email.tld'],['name':'Tim Barr']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-false message="Bad delete didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="deleteContactBadQuery" description="MUnit Test">
+        <munit:set payload="#[]" doc:name="set queryparams">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-false message="Bad delete didn't work" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="updateMissingId" description="MUnit Test">
+        <munit:set payload="{&quot;Email&quot;: &quot;delete@mefive.ca&quot;,&quot;FirstName&quot;: &quot;test&quot;,&quot;Department&quot;: &quot;Of fun&quot;,&quot;LastName&quot;: &quot;testsen&quot;,&quot;Salutation&quot;: &quot;mr&quot;,&quot;OtherStreet&quot;: &quot;another street&quot;,&quot;OtherCity&quot;: &quot;another city&quot;,&quot;OtherState&quot;: &quot;another state&quot;,&quot;OtherPostalCode&quot;: &quot;another&quot;,&quot;OtherCountry&quot;: &quot;anotheronia&quot;,&quot;MailingStreet&quot;: &quot;mailing street&quot;,&quot;MailingCity&quot;: &quot;mailing city&quot;,&quot;MailingState&quot;: &quot;mailing state&quot;,&quot;MailingPostalCode&quot;: &quot;mailing&quot;,&quot;MailingCountry&quot;: &quot;maiistan&quot;,&quot;Phone&quot;: &quot;1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;1 234 567 8910&quot;,&quot;Fax&quot;: &quot;1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;delete title&quot;,&quot;AssistantName&quot;: &quot;johnathan rivers&quot;,&quot;Birthdate&quot;: &quot;1970-01-30&quot;, &quot;Description&quot;: &quot;Tall dark and so-so&quot;}" encoding="UTF-8" mimeType="application/json" doc:name="Set Message"/>
+        <flow-ref name="updateContact" doc:name="put"/>
+        <munit:assert-false message="An update without ID was expected to throw an error" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+    <munit:test name="addSameTwiceGetErrorAndDelete" description="MUnit Test">
+        <munit:set payload="{&quot;Email&quot;: &quot;delete@mefive.ca&quot;,&quot;FirstName&quot;: &quot;test&quot;,&quot;Department&quot;: &quot;Of fun&quot;,&quot;LastName&quot;: &quot;testsen&quot;,&quot;Salutation&quot;: &quot;mr&quot;,&quot;OtherStreet&quot;: &quot;another street&quot;,&quot;OtherCity&quot;: &quot;another city&quot;,&quot;OtherState&quot;: &quot;another state&quot;,&quot;OtherPostalCode&quot;: &quot;another&quot;,&quot;OtherCountry&quot;: &quot;anotheronia&quot;,&quot;MailingStreet&quot;: &quot;mailing street&quot;,&quot;MailingCity&quot;: &quot;mailing city&quot;,&quot;MailingState&quot;: &quot;mailing state&quot;,&quot;MailingPostalCode&quot;: &quot;mailing&quot;,&quot;MailingCountry&quot;: &quot;maiistan&quot;,&quot;Phone&quot;: &quot;1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;1 234 567 8910&quot;,&quot;Fax&quot;: &quot;1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;delete title&quot;,&quot;AssistantName&quot;: &quot;johnathan rivers&quot;,&quot;Birthdate&quot;: &quot;1970-01-30&quot;, &quot;Description&quot;: &quot;Tall dark and so-so&quot;}" doc:name="Set Message" encoding="UTF-8" mimeType="application/json"/>
+        <flow-ref name="addContact" doc:name="post"/>
+        <munit:assert-true message="Add didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+        <munit:set payload="{&quot;Email&quot;: &quot;delete@mefive.ca&quot;,&quot;FirstName&quot;: &quot;test&quot;,&quot;Department&quot;: &quot;Of fun&quot;,&quot;LastName&quot;: &quot;testsen&quot;,&quot;Salutation&quot;: &quot;mr&quot;,&quot;OtherStreet&quot;: &quot;another street&quot;,&quot;OtherCity&quot;: &quot;another city&quot;,&quot;OtherState&quot;: &quot;another state&quot;,&quot;OtherPostalCode&quot;: &quot;another&quot;,&quot;OtherCountry&quot;: &quot;anotheronia&quot;,&quot;MailingStreet&quot;: &quot;mailing street&quot;,&quot;MailingCity&quot;: &quot;mailing city&quot;,&quot;MailingState&quot;: &quot;mailing state&quot;,&quot;MailingPostalCode&quot;: &quot;mailing&quot;,&quot;MailingCountry&quot;: &quot;maiistan&quot;,&quot;Phone&quot;: &quot;1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;1 234 567 8910&quot;,&quot;Fax&quot;: &quot;1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;delete title&quot;,&quot;AssistantName&quot;: &quot;johnathan rivers&quot;,&quot;Birthdate&quot;: &quot;1970-01-30&quot;, &quot;Description&quot;: &quot;Tall dark and so-so&quot;}" encoding="UTF-8" mimeType="application/json" doc:name="Same Set Message as before"/>
+        <flow-ref name="addContact" doc:name="post"/>
+        <munit:assert-false message="Duplicate add should not have been possible" condition="#[payload.success]" doc:name="Assert False"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['name':'test testsen']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-true message="Delete didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+    </munit:test>   
+    <munit:test name="addSimilarTwiceGetDuplicateErrorsOnSearchsThenDelete" description="MUnit Test">
+        <munit:set payload="{&quot;Email&quot;: &quot;delete@mesix.ca&quot;,&quot;FirstName&quot;: &quot;test&quot;,&quot;Department&quot;: &quot;Of fun&quot;,&quot;LastName&quot;: &quot;testsen&quot;,&quot;Salutation&quot;: &quot;mr&quot;,&quot;OtherStreet&quot;: &quot;another street&quot;,&quot;OtherCity&quot;: &quot;another city&quot;,&quot;OtherState&quot;: &quot;another state&quot;,&quot;OtherPostalCode&quot;: &quot;another&quot;,&quot;OtherCountry&quot;: &quot;anotheronia&quot;,&quot;MailingStreet&quot;: &quot;mailing street&quot;,&quot;MailingCity&quot;: &quot;mailing city&quot;,&quot;MailingState&quot;: &quot;mailing state&quot;,&quot;MailingPostalCode&quot;: &quot;mailing&quot;,&quot;MailingCountry&quot;: &quot;maiistan&quot;,&quot;Phone&quot;: &quot;1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;1 234 567 8910&quot;,&quot;Fax&quot;: &quot;1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;delete title&quot;,&quot;AssistantName&quot;: &quot;johnathan rivers&quot;,&quot;Birthdate&quot;: &quot;1970-01-30&quot;, &quot;Description&quot;: &quot;Tall dark and so-so&quot;}" doc:name="Set Message" encoding="UTF-8" mimeType="application/json"/>
+        <flow-ref name="addContact" doc:name="post"/>
+        <munit:assert-true message="Add didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+        <munit:set payload="{&quot;Email&quot;: &quot;delete@mesix.ca&quot;,&quot;FirstName&quot;: &quot;testers&quot;,&quot;Department&quot;: &quot;Of fun&quot;,&quot;LastName&quot;: &quot;testerssen&quot;,&quot;Salutation&quot;: &quot;mr&quot;,&quot;OtherStreet&quot;: &quot;another street&quot;,&quot;OtherCity&quot;: &quot;another city&quot;,&quot;OtherState&quot;: &quot;another state&quot;,&quot;OtherPostalCode&quot;: &quot;another&quot;,&quot;OtherCountry&quot;: &quot;anotheronia&quot;,&quot;MailingStreet&quot;: &quot;mailing street&quot;,&quot;MailingCity&quot;: &quot;mailing city&quot;,&quot;MailingState&quot;: &quot;mailing state&quot;,&quot;MailingPostalCode&quot;: &quot;mailing&quot;,&quot;MailingCountry&quot;: &quot;maiistan&quot;,&quot;Phone&quot;: &quot;1 234 567 8910&quot;,&quot;MobilePhone&quot;: &quot;1 234 567 8910&quot;,&quot;HomePhone&quot;: &quot;1 234 567 8910&quot;,&quot;OtherPhone&quot;: &quot;1 234 567 8910&quot;,&quot;AssistantPhone&quot;: &quot;1 234 567 8910&quot;,&quot;Fax&quot;: &quot;1 234 567 8910 ext 4352&quot;,&quot;Title&quot;: &quot;delete title&quot;,&quot;AssistantName&quot;: &quot;johnathan rivers&quot;,&quot;Birthdate&quot;: &quot;1970-01-30&quot;, &quot;Description&quot;: &quot;Tall dark and so-so&quot;}" encoding="UTF-8" mimeType="application/json" doc:name="Same Set Message as before"/>
+        <flow-ref name="addContact" doc:name="post"/>
+        <munit:assert-true message="Second add didn't work, it should have been unique enough" condition="#[payload.success]" doc:name="Assert True"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'get@mesix.ca']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-false message="Get worked, but there are multiples with the same email so it shouldn't have" condition="#[payload.success]" doc:name="Assert False"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'delete@mesix.ca']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-false message="Delete worked, but there are multiples with the same email so it shouldn't have" condition="#[payload.success]" doc:name="Assert False"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['name':'test testsen']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-true message="Delete by a unique name didn't work" condition="#[payload.success]" doc:name="Assert True"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'delete@mesix.ca']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="getContact" doc:name="get"/>
+        <munit:assert-true message="Get failed, but there are no longer multiples with the same email so it shouldn't have" condition="#[payload.success]" doc:name="Assert False"/>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="http.query.params" value="#[['email':'delete@mesix.ca']]"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="deleteContact" doc:name="delete"/>
+        <munit:assert-true message="Delete failed, but there are not multiples with the same email it shouldn't have" condition="#[payload.success]" doc:name="Assert False"/>
+    </munit:test>
+</mule>

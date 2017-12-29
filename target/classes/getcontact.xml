@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:wmq="http://www.mulesoft.org/schema/mule/ee/wmq" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ee/wmq http://www.mulesoft.org/schema/mule/ee/wmq/current/mule-wmq-ee.xsd">
+    <flow name="contactGETFlow">
+        <logger message="Entering GET flow" level="DEBUG" category="getContactLogger" doc:name="Logger"/>
+        <set-variable variableName="id" value="#[ ( message.inboundProperties.'http.uri.params' != null &amp;&amp; message.inboundProperties.'http.uri.params'.SFDC_Id != null ) ? message.inboundProperties.'http.uri.params'.SFDC_Id : ( message.inboundProperties.'http.query.params' != null ? message.inboundProperties.'http.query.params'.id : &quot;&quot; ) ]" doc:name="Set Id"/>
+        <choice doc:name="Search by Id?">
+            <!-- when expression="#[message.inboundProperties.'http.query.params' != null &amp;&amp; message.inboundProperties.'http.query.params'.id != null]" -->
+            <when expression="#[flowVars.id != null]">
+                <logger message="SFDC search based on supplied Id " level="INFO" category="getContactLogger" doc:name="Logger"/>
+                <sfdc:query config-ref="ndbeal_SF_Authentication" query="dsql:SELECT AccountId,AssistantName,AssistantPhone,Birthdate,CleanStatus,CreatedById,CreatedDate,Department,Description,Email,EmailBouncedDate,EmailBouncedReason,Fax,FirstName,HomePhone,Id,IsDeleted,IsEmailBounced,Jigsaw,JigsawContactId,Languages__c,LastActivityDate,LastCURequestDate,LastCUUpdateDate,LastModifiedById,LastModifiedDate,LastName,LastReferencedDate,LastViewedDate,LeadSource,Level__c,MailingCity,MailingCountry,MailingGeocodeAccuracy,MailingLatitude,MailingLongitude,MailingPostalCode,MailingState,MailingStreet,MasterRecordId,MobilePhone,Name,OtherCity,OtherCountry,OtherGeocodeAccuracy,OtherLatitude,OtherLongitude,OtherPhone,OtherPostalCode,OtherState,OtherStreet,OwnerId,Phone,PhotoUrl,ReportsToId,Salutation,SystemModstamp,Title FROM Contact WHERE Id = '#[flowVars.id]' ORDER BY Id ASC" doc:name="by ID only"/>
+                <logger message="SFDC response" level="DEBUG" category="getContactLogger" doc:name="Logger"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.query.params' != null]">
+                <choice doc:name="Search based on http.query.params value(s)">
+                    <when expression="#[message.inboundProperties.'http.query.params'.email != null &amp;&amp; message.inboundProperties.'http.query.params'.name == null]">
+                        <logger message="SFDC search based on email only" level="DEBUG" category="getContactLogger" doc:name="Logger"/>
+                        <sfdc:query config-ref="ndbeal_SF_Authentication" query="dsql:SELECT AccountId,AssistantName,AssistantPhone,Birthdate,CleanStatus,CreatedById,CreatedDate,Department,Description,Email,EmailBouncedDate,EmailBouncedReason,Fax,FirstName,HomePhone,Id,IsDeleted,IsEmailBounced,Jigsaw,JigsawContactId,Languages__c,LastActivityDate,LastCURequestDate,LastCUUpdateDate,LastModifiedById,LastModifiedDate,LastName,LastReferencedDate,LastViewedDate,LeadSource,Level__c,MailingCity,MailingCountry,MailingGeocodeAccuracy,MailingLatitude,MailingLongitude,MailingPostalCode,MailingState,MailingStreet,MasterRecordId,MobilePhone,Name,OtherCity,OtherCountry,OtherGeocodeAccuracy,OtherLatitude,OtherLongitude,OtherPhone,OtherPostalCode,OtherState,OtherStreet,OwnerId,Phone,PhotoUrl,ReportsToId,Salutation,SystemModstamp,Title FROM Contact WHERE Email = '#[message.inboundProperties.'http.query.params'.email]' ORDER BY Id ASC" doc:name="by Email only"/>
+                        <logger message="SFDC response" level="DEBUG" category="getContactLogger" doc:name="Logger"/>
+                    </when>
+                    <when expression="#[message.inboundProperties.'http.query.params'.email == null &amp;&amp; message.inboundProperties.'http.query.params'.name != null]">
+                        <logger message="SFDC search based on name only" level="DEBUG" category="getContactLogger" doc:name="Logger"/>
+                        <sfdc:query config-ref="ndbeal_SF_Authentication" query="dsql:SELECT AccountId,AssistantName,AssistantPhone,Birthdate,CleanStatus,CreatedById,CreatedDate,Department,Description,Email,EmailBouncedDate,EmailBouncedReason,Fax,FirstName,HomePhone,Id,IsDeleted,IsEmailBounced,Jigsaw,JigsawContactId,Languages__c,LastActivityDate,LastCURequestDate,LastCUUpdateDate,LastModifiedById,LastModifiedDate,LastName,LastReferencedDate,LastViewedDate,LeadSource,Level__c,MailingCity,MailingCountry,MailingGeocodeAccuracy,MailingLatitude,MailingLongitude,MailingPostalCode,MailingState,MailingStreet,MasterRecordId,MobilePhone,Name,OtherCity,OtherCountry,OtherGeocodeAccuracy,OtherLatitude,OtherLongitude,OtherPhone,OtherPostalCode,OtherState,OtherStreet,OwnerId,Phone,PhotoUrl,ReportsToId,Salutation,SystemModstamp,Title FROM Contact WHERE Name = '#[message.inboundProperties.'http.query.params'.name]' ORDER BY Id ASC" doc:name="by Name only"/>
+                        <logger message="SFDC response" level="DEBUG" category="getContactLogger" doc:name="Logger"/>
+                    </when>
+                    <when expression="#[message.inboundProperties.'http.query.params'.email != null &amp;&amp; message.inboundProperties.'http.query.params'.name != null]">
+                        <logger message="SFDC search based on name and email" level="DEBUG" doc:name="Logger"/>
+                        <sfdc:query config-ref="ndbeal_SF_Authentication" query="dsql:SELECT AccountId,AssistantName,AssistantPhone,Birthdate,CleanStatus,CreatedById,CreatedDate,Department,Description,Email,EmailBouncedDate,EmailBouncedReason,Fax,FirstName,HomePhone,Id,IsDeleted,IsEmailBounced,Jigsaw,JigsawContactId,Languages__c,LastActivityDate,LastCURequestDate,LastCUUpdateDate,LastModifiedById,LastModifiedDate,LastName,LastReferencedDate,LastViewedDate,LeadSource,Level__c,MailingCity,MailingCountry,MailingGeocodeAccuracy,MailingLatitude,MailingLongitude,MailingPostalCode,MailingState,MailingStreet,MasterRecordId,MobilePhone,Name,OtherCity,OtherCountry,OtherGeocodeAccuracy,OtherLatitude,OtherLongitude,OtherPhone,OtherPostalCode,OtherState,OtherStreet,OwnerId,Phone,PhotoUrl,ReportsToId,Salutation,SystemModstamp,Title FROM Contact WHERE (Name = '#[message.inboundProperties.'http.query.params'.name]' AND Email = '#[message.inboundProperties.'http.query.params'.email]') ORDER BY Id ASC" doc:name="by Name and Email"/>
+                        <logger message="SFDC response" level="DEBUG" category="getContactLogger" doc:name="Logger"/>
+                    </when>
+		            <otherwise>
+		                <logger message="Valid input parameters not found" level="WARN" doc:name="Logger" category="getContactLogger"/>
+		                <set-payload value="#[&quot;No valid input parameters found.&quot;]" doc:name="Set Payload"/>
+		            </otherwise>
+                </choice>
+            </when>
+            <otherwise>
+                <logger message="Input parameters not found" level="WARN" doc:name="Logger" category="getContactLogger"/>
+                <set-payload value="#[&quot;No input parameters found.&quot;]" doc:name="Set Payload"/>
+            </otherwise>
+        </choice>
+        <dw:transform-message doc:name="force org.mule.streaming.ConsumerIterator to application/json">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+// This exists solely to force the stream to be correctly parsed so
+// the next transformer can get the size of the response properly.
+// Without it the size of the array is misreported on second inquiry
+// causing all manner of processing challenges.
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="Formatting response" level="DEBUG" category="getContactLogger" doc:name="Logger"/>
+        <dw:transform-message doc:name="Format response">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%var payloadSize = 0 when payload == null otherwise sizeOf payload
+%var good = (payloadSize == 1) and (payload[0] is :object)
+---
+{
+  "success": payloadSize == 1,
+  "status": 200 when good otherwise 404 when (payloadSize == 0) otherwise 400,
+  "message": payload[0] when good otherwise payload
+}]]></dw:set-payload>
+            <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+%var payloadSize = 0 when payload == null otherwise sizeOf payload
+%var good = (payloadSize == 1) and (payload[0] is :object)
+---
+200 when good otherwise 404 when (payloadSize == 0) otherwise 400]]></dw:set-property>
+        </dw:transform-message>
+        <logger message="Exiting GET flow" level="INFO" doc:name="Logger"/>
+
+    </flow>
+</mule>
